@@ -1,0 +1,5 @@
+name: punishmentsystem-spigot
+version: '${project.version}'
+main: pl.jordii.punishmentsystemspigot.PunishmentSystem
+api-version: 1.19
+authors: [ Jordan ]

@@ -1,0 +1,3 @@
+name: punishmentsystem-proxy
+version: '${project.version}'
+main: pl.jordii.punishmentsystemproxy.PunishmentSystem
