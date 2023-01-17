@@ -1,0 +1,11 @@
+{
+  "layout": "&cYou have been banned from this server!\n&cReason: {reason}\n&cAdmin: {admin}\n&6{createDate} : {expireDate}\n&cYour UUID is: {uuid}\n&bAppeal at: mywebsite.com",
+  "placeholders": {
+    "reason": "The reason for the ban",
+    "name": "The player's name",
+    "uuid": "The player's uuid",
+    "createDate": "The ban create date",
+    "expireDate": "The ban expire date",
+    "admin": "The admin name"
+  }
+}

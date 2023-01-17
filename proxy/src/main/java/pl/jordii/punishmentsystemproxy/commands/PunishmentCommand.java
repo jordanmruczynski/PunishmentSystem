@@ -5,10 +5,13 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import pl.jordii.punishmentsystemproxy.config.BanLayout;
 import pl.jordii.punishmentsystemproxy.database.MySQLPunishmentService;
 import pl.jordii.punishmentsystemproxy.database.model.Punishment;
 import pl.jordii.punishmentsystemproxy.database.services.PunishmentType;
+import pl.jordii.punishmentsystemproxy.utils.TimeParser;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
@@ -19,10 +22,12 @@ public class PunishmentCommand extends Command {
 
     private final MySQLPunishmentService punishmentService;
     private final ExecutorService executorService;
-    public PunishmentCommand(MySQLPunishmentService punishmentService, ExecutorService executorService) {
+    private final BanLayout banLayout;
+    public PunishmentCommand(MySQLPunishmentService punishmentService, ExecutorService executorService, BanLayout banLayout) {
         super("punishment", "punishmentsystem.command.punishment", "ban", "mute");
         this.punishmentService = punishmentService;
         this.executorService = executorService;
+        this.banLayout = banLayout;
     }
 
     /**
@@ -43,31 +48,14 @@ public class PunishmentCommand extends Command {
             return;
         }
 
-        Punishment punishment = new Punishment(player.getUniqueId(), reason, adminUuid, type, LocalDateTime.now(), parseTime(time), player.getAddress().getAddress().getHostAddress().toString());
+        final Duration duration = TimeParser.parseTime(time);
+
+        Punishment punishment = new Punishment(player.getUniqueId(), reason, adminUuid, type, LocalDateTime.now(), LocalDateTime.now().plus(duration), player.getAddress().getAddress().getHostAddress().toString());
         executorService.submit(() -> {
             punishmentService.save(punishment);
         });
-        player.disconnect(new TextComponent("you have been banned"));
 
-    }
+        player.disconnect(new TextComponent(banLayout.getBanMessage(punishment)));
 
-//    private long parseTime(String time) {
-//        long duration = -1;
-//        try {
-//            duration = Duration.parse(time.toLowerCase()).toMillis();
-//        } catch (DateTimeParseException e) {
-//            e.printStackTrace();
-//        }
-//        return duration;
-//    }
-
-    private LocalDateTime parseTime(String time) {
-        LocalDateTime duration = LocalDateTime.MIN;
-        try {
-            duration = LocalDateTime.parse(time);
-        } catch (DateTimeParseException e) {
-            e.printStackTrace();
-        }
-        return duration;
     }
 }
