@@ -8,13 +8,12 @@ import pl.jordii.punishmentsystemproxy.mysql.MySQLConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class MySQLPunishmentService implements PunishmentService {
 
     private final MySQLConnection connection;
+    private final Map<UUID, Punishment> muteUsers = new HashMap<>();
 
     public MySQLPunishmentService(MySQLConnection connection) {
         this.connection = connection;
@@ -138,5 +137,29 @@ public class MySQLPunishmentService implements PunishmentService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void setUserMuted(Punishment punishment) {
+        if (punishment == null) return;
+        if (punishment.getPunishmentType() == PunishmentType.MUTE) {
+            muteUsers.put(punishment.getPlayer(), punishment);
+        }
+    }
+
+    public void setUserUnmuted(Punishment punishment) {
+        if (punishment == null) return;
+        if (punishment.getPunishmentType() == PunishmentType.MUTE) {
+            if (muteUsers.containsKey(punishment.getPlayer())) {
+                muteUsers.remove(punishment.getPlayer());
+            }
+        }
+    }
+
+    public Punishment getMutedUser(UUID uuid) {
+        if (muteUsers.containsKey(uuid)) {
+            return muteUsers.get(uuid);
+        } else {
+            return null;
+        }
     }
 }

@@ -4,8 +4,8 @@ import java.time.Duration;
 
 public class TimeParser {
 
-    private TimeParser() {
-        //disable auto constructor creator
+    private TimeParser() { //disable auto constructor creator
+        throw new AssertionError();
     }
 
     public static Duration parseTime(String time) {

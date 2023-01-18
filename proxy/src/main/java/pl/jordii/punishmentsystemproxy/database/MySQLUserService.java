@@ -43,24 +43,6 @@ public class MySQLUserService implements UserService {
         return users;
     }
 
-//    @Override
-//    public User findById(UUID uuid) {
-//        final String sql = "SELECT * FROM users WHERE uuid = ?";
-//        try (PreparedStatement stmt = connection.getConnection().prepareStatement(sql)) {
-//            stmt.setString(1, uuid.toString());
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                if (rs.next()) {
-//                    String name = rs.getString("name");
-//                    return new User(uuid, name);
-//                }
-//            };
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//        return null;
-//    }
-
     @Override
     public User findById(UUID uuid) {
         final String sql = "SELECT * FROM users WHERE uuid = ?";
@@ -114,5 +96,23 @@ public class MySQLUserService implements UserService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public User findByName(String name) {
+        final String sql = "SELECT * FROM users WHERE name = ?";
+        try (Connection conn = connection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    return new User(uuid, name);
+                }
+            };
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
     }
 }
