@@ -40,7 +40,7 @@ public final class PunishmentSystem extends Plugin {
         }
 
         getProxy().getPluginManager().registerListener(this, new UserRepository(userService, punishmentService, executorService, banLayout));
-        getProxy().getPluginManager().registerCommand(this, new PunishmentCommand(punishmentService, executorService, banLayout));
+        getProxy().getPluginManager().registerCommand(this, new PunishmentCommand(punishmentService, executorService, banLayout, userService));
 
     }
 

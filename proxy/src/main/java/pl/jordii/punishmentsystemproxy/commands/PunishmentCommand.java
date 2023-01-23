@@ -7,7 +7,9 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import pl.jordii.punishmentsystemproxy.config.PunishmentLayout;
 import pl.jordii.punishmentsystemproxy.database.MySQLPunishmentService;
+import pl.jordii.punishmentsystemproxy.database.MySQLUserService;
 import pl.jordii.punishmentsystemproxy.database.model.Punishment;
+import pl.jordii.punishmentsystemproxy.database.model.User;
 import pl.jordii.punishmentsystemproxy.database.services.PunishmentType;
 import pl.jordii.punishmentsystemproxy.utils.TimeParser;
 
@@ -22,11 +24,13 @@ public class PunishmentCommand extends Command {
     private final MySQLPunishmentService punishmentService;
     private final ExecutorService executorService;
     private final PunishmentLayout banLayout;
-    public PunishmentCommand(MySQLPunishmentService punishmentService, ExecutorService executorService, PunishmentLayout banLayout) {
+    private final MySQLUserService userService;
+    public PunishmentCommand(MySQLPunishmentService punishmentService, ExecutorService executorService, PunishmentLayout banLayout, MySQLUserService userService) {
         super("punishment", "punishmentsystem.command.punishment", "ban", "mute");
         this.punishmentService = punishmentService;
         this.executorService = executorService;
         this.banLayout = banLayout;
+        this.userService = userService;
     }
 
     /**
@@ -49,22 +53,24 @@ public class PunishmentCommand extends Command {
 
         final Duration duration = TimeParser.parseTime(time);
 
-        final Punishment punishment = new Punishment(player.getUniqueId(), reason, adminUuid, type, LocalDateTime.now(), LocalDateTime.now().plus(duration), player.getAddress().getAddress().getHostAddress().toString());
         executorService.submit(() -> {
+            final User user = userService.findByName(playerName);
+            final Punishment punishment = new Punishment(player.getUniqueId(), reason, adminUuid, type, LocalDateTime.now(), LocalDateTime.now().plus(duration), player.getAddress().getAddress().getHostAddress().toString());
             punishmentService.save(punishment);
+
+            switch (type) {
+                case BAN:
+                    final ProxiedPlayer player = ProxyServer.getInstance().getPlayer();
+                    player.disconnect(new TextComponent(banLayout.getBanMessage(punishment)));
+                    break;
+                case MUTE:
+                    punishmentService.setUserMuted(punishment);
+                    break;
+                default:
+                    break;
+            }
         });
 
-        switch (type) {
-            case BAN:
-                player.disconnect(new TextComponent(banLayout.getBanMessage(punishment)));
-                break;
-            case MUTE:
-                punishmentService.setUserMuted(punishment);
-                player.sendMessage(new TextComponent("§cZostales wyciszony!"));
-                break;
-            default:
-                break;
-        }
 
     }
 }
