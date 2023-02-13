@@ -20,13 +20,15 @@ public final class PunishmentSystem extends Plugin {
     private MySQLPunishmentService punishmentService;
     private ExecutorService executorService;
     private PunishmentLayout banLayout;
+    private final String configFileName = "mysqlCredentials.json";
+    private final String banLayoutFileName = "banDisconnectLayout.json";
     private File configFile;
     private File banLayoutFile;
 
     @Override
     public void onEnable() {
         setupFiles();
-        connection = new MySQLConnection(getDataFolder() + "/mysqlCredentials.json");
+        connection = new MySQLConnection(getDataFolder() + "/" + configFileName);
         userService = new MySQLUserService(connection);
         punishmentService = new MySQLPunishmentService(connection);
         executorService = Executors.newCachedThreadPool();
@@ -51,15 +53,15 @@ public final class PunishmentSystem extends Plugin {
 
     private void setupFiles() {
         File dataFolder = getDataFolder();
-        configFile = new File(dataFolder, "mysqlCredentials.json");
-        banLayoutFile = new File(dataFolder, "banDisconnectLayout.json");
+        configFile = new File(dataFolder, configFileName);
+        banLayoutFile = new File(dataFolder, banLayoutFileName);
 
         if (!dataFolder.exists()) {
             dataFolder.mkdir();
         }
 
-        FileCopy.createFileFromResource("mysqlCredentials.json", configFile, this);
-        FileCopy.createFileFromResource("banDisconnectLayout.json", banLayoutFile, this);
+        FileCopy.createFileFromResource(configFileName, configFile, this);
+        FileCopy.createFileFromResource(banLayoutFileName, banLayoutFile, this);
     }
 
 }
